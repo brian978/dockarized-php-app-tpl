@@ -1,10 +1,16 @@
 #!/bin/bash
 
-# Function to run a command in the php container
-run_in_php_container() {
-    docker compose run --rm php /bin/bash -c "$1"
-}
+# Ensure the Laravel app directory is empty
+rm -rfv ./app && mkdir ./app
+rm -rfv ./logs/nginx
+rm -rfv ./logs/php
 
-run_in_php_container "rm .gitkeep  && composer create-project laravel/laravel ."
+docker-compose build --no-cache
+
+# Ensure we have the required configuration files for the docker services
+sh scripts/set_configs.sh
+
+# Run the Laravel installer
+docker compose run --rm app /bin/bash -c "composer create-project laravel/laravel ."
 
 echo "Laravel installation completed."
